@@ -129,6 +129,16 @@ function updateReadout() {
   readoutGear.classList.add('flash');
 }
 
+function showCandidate(element, level) {
+  const key = `${element}-${level}`;
+  const gearName = GEAR_NAMES[key] || `${element}·${level}`;
+  const elem  = ELEMENTS.find(e => e.key === element);
+  const lvl   = LEVELS.find(l  => l.key === level);
+  readoutGear.textContent = `${elem.glyph}  ${gearName}`;
+  readoutGear.style.color = elem.color;
+  readoutName.textContent = `${elem.name} \u00B7 ${lvl.name}`;
+}
+
 function updateStick() {
   const selCell = shifter.querySelector('.cell.selected');
   if (!selCell) return;
@@ -179,6 +189,7 @@ function closeDialog() {
   dialog.classList.remove('open');
   fab.setAttribute('aria-expanded', 'false');
   updateFab();
+  updateReadout();
 }
 
 function scheduleClose() {
@@ -281,7 +292,10 @@ document.addEventListener('keydown', e => {
     const targetCell = shifter.querySelector(
       `.cell[data-element="${ELEMENTS[newCol].key}"][data-level="${LEVELS[newRow].key}"]`
     );
-    if (targetCell) targetCell.focus();
+    if (targetCell) {
+      targetCell.focus();
+      showCandidate(ELEMENTS[newCol].key, LEVELS[newRow].key);
+    }
   }
 });
 

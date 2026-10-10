@@ -150,6 +150,21 @@ rg.classList.add('flash');
 updateFab();
 if(!drag)updateStick();
 }
+function showCandidate(col,row){
+const ci=COLUMNS.indexOf(col);
+rg.textContent=GLYPHS[ci]+'  '+col+'·'+row;
+rg.style.color=COLORS[ci];
+rs.textContent=col+' · '+row;
+}
+function updateReadout(){
+const ci=COLUMNS.indexOf(cur.col);
+rg.textContent=GLYPHS[ci]+'  '+cur.col+'·'+cur.row;
+rg.style.color=COLORS[ci];
+rs.textContent=cur.col+' · '+cur.row;
+rg.classList.remove('flash');
+void rg.offsetHeight;
+rg.classList.add('flash');
+}
 function updateFab(){
 const ci=COLUMNS.indexOf(cur.col);
 const ri=ROWS.indexOf(cur.row);
@@ -177,6 +192,7 @@ function close(){
 clearTimeout(ct);
 dlg.classList.remove('open');
 fab.setAttribute('aria-expanded','false');
+updateReadout();
 }
 function sched(){
 clearTimeout(ct);
@@ -243,7 +259,8 @@ default:return;
 }
 if(nc!==ci||nr!==ri){
 e.preventDefault();
-grid.querySelector('.cell[data-col="'+COLUMNS[nc]+'"][data-row="'+ROWS[nr]+'"]')?.focus();
+var tc=grid.querySelector('.cell[data-col="'+COLUMNS[nc]+'"][data-row="'+ROWS[nr]+'"]');
+if(tc){tc.focus();showCandidate(COLUMNS[nc],ROWS[nr]);}
 }
 });
 const sc=document.getElementById('stars');
