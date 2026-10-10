@@ -110,6 +110,8 @@ function updateCells() {
       cell.dataset.element === current.element &&
       cell.dataset.level === current.level;
     cell.classList.toggle('selected', isSel);
+    cell.classList.toggle('hl-row', !isSel && cell.dataset.level === current.level);
+    cell.classList.toggle('hl-col', !isSel && cell.dataset.element === current.element);
     cell.setAttribute('aria-selected', isSel);
   });
 }
