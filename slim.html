@@ -184,6 +184,7 @@ fab.addEventListener('mouseenter',open);
 fab.addEventListener('mouseleave',sched);
 dlg.addEventListener('mouseenter',open);
 dlg.addEventListener('mouseleave',sched);
+fab.addEventListener('click',()=>{dlg.classList.contains('open')?close():open()});
 document.addEventListener('keydown',e=>{
 if(e.key==='Escape'&&dlg.classList.contains('open'))close();
 });

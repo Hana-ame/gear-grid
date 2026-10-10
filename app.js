@@ -189,6 +189,11 @@ fab.addEventListener('mouseleave', scheduleClose);
 dialog.addEventListener('mouseenter', openDialog);
 dialog.addEventListener('mouseleave', scheduleClose);
 
+// Click (touch / keyboard: Tab focus + Enter/Space)
+fab.addEventListener('click', () => {
+  dialog.classList.contains('open') ? closeDialog() : openDialog();
+});
+
 // Escape to close
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape' && dialog.classList.contains('open')) {
