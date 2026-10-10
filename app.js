@@ -157,50 +157,29 @@ function updateFab() {
   fab.style.borderColor = elem.color + '60';
 }
 
-/* ============ Dialog (hover-intent) ============ */
-let closeTimer = null;
-let openSource = null; // 'mouse' or 'keyboard'
-
-function openDialog(source) {
-  clearTimeout(closeTimer);
+/* ============ Dialog (click-to-open, focusout-to-close) ============ */
+function openDialog() {
   dialog.classList.add('open');
   fab.setAttribute('aria-expanded', 'true');
-  openSource = source;
-  if (source !== 'mouse') {
-    requestAnimationFrame(() => {
-      shifter.querySelector('.cell.selected')?.focus();
-    });
-  }
+  requestAnimationFrame(() => {
+    shifter.querySelector('.cell.selected')?.focus();
+  });
 }
 
 function closeDialog() {
-  clearTimeout(closeTimer);
   dialog.classList.remove('open');
   fab.setAttribute('aria-expanded', 'false');
-  openSource = null;
   updateFab();
   fab.focus();
 }
 
-function scheduleClose() {
-  if (openSource !== 'mouse') return;
-  clearTimeout(closeTimer);
-  closeTimer = setTimeout(closeDialog, 250);
-}
+// Click FAB to open (Enter/Space on FAB also triggers click)
+fab.addEventListener('click', openDialog);
 
-// Hover handlers (FAB + dialog)
-fab.addEventListener('mouseenter', () => openDialog('mouse'));
-fab.addEventListener('mouseleave', scheduleClose);
-dialog.addEventListener('mouseenter', () => openDialog('mouse'));
-dialog.addEventListener('mouseleave', scheduleClose);
-
-// Keyboard: Enter / Space on FAB to open
-fab.addEventListener('keydown', e => {
-  if (e.key === 'Enter' || e.key === ' ') {
-    e.preventDefault();
-    if (!dialog.classList.contains('open')) {
-      openDialog('keyboard');
-    }
+// Focus leaves dialog → close
+dialog.addEventListener('focusout', e => {
+  if (!dialog.contains(e.relatedTarget)) {
+    closeDialog();
   }
 });
 
