@@ -323,10 +323,15 @@ body {
   font-weight: 600;
   letter-spacing: 1px;
   text-transform: uppercase;
-  opacity: 0.9;
+  opacity: 0;
+  transition: opacity 0.2s;
   z-index: 1;
   text-align: center;
   line-height: 1.2;
+}
+
+.cell.selected .name {
+  opacity: 0.9;
 }
 
 .cell .level-dots {

@@ -159,31 +159,32 @@ function updateFab() {
   fab.style.borderColor = elem.color + '60';
 }
 
-/* ============ Dialog (click-to-open, focusout-to-close) ============ */
+/* ============ Dialog (hover-intent, close on select) ============ */
+let closeTimer = null;
+
 function openDialog() {
+  clearTimeout(closeTimer);
   dialog.classList.add('open');
   fab.setAttribute('aria-expanded', 'true');
-  requestAnimationFrame(() => {
-    shifter.querySelector('.cell.selected')?.focus();
-  });
 }
 
 function closeDialog() {
+  clearTimeout(closeTimer);
   dialog.classList.remove('open');
   fab.setAttribute('aria-expanded', 'false');
   updateFab();
-  fab.focus();
 }
 
-// Click FAB to open (Enter/Space on FAB also triggers click)
-fab.addEventListener('click', openDialog);
+function scheduleClose() {
+  clearTimeout(closeTimer);
+  closeTimer = setTimeout(closeDialog, 250);
+}
 
-// Focus leaves dialog → close
-dialog.addEventListener('focusout', e => {
-  if (!dialog.contains(e.relatedTarget)) {
-    closeDialog();
-  }
-});
+// Hover handlers
+fab.addEventListener('mouseenter', openDialog);
+fab.addEventListener('mouseleave', scheduleClose);
+dialog.addEventListener('mouseenter', openDialog);
+dialog.addEventListener('mouseleave', scheduleClose);
 
 // Escape to close
 document.addEventListener('keydown', e => {
@@ -192,11 +193,12 @@ document.addEventListener('keydown', e => {
   }
 });
 
-/* ============ Click (grid cells) ============ */
+/* ============ Click (grid cells — select then close) ============ */
 shifter.addEventListener('click', e => {
   const cell = e.target.closest('.cell');
   if (!cell) return;
   select(cell.dataset.element, cell.dataset.level);
+  closeDialog();
 });
 
 /* ============ Drag (pointer events) ============ */
@@ -231,6 +233,7 @@ function endDrag() {
   lastDragCell = null;
   stick.classList.remove('dragging');
   updateStick();
+  closeDialog();
 }
 
 document.addEventListener('pointerup', endDrag);
