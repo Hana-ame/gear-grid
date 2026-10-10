@@ -140,6 +140,14 @@ Colors are auto-assigned per column from `COLORS[]`. Dots per row: `ROWS.length 
 
 `slim.html` is a single self-contained file (~5 KB) with inline CSS + JS. No external dependencies, zero build step.
 
+## React Version
+
+[react.html](https://hana-ame.github.io/gear-grid/react.html) — React 18 via CDN, hooks-based (useState/useRef/useEffect), single self-contained HTML file.
+
+## Vue Version
+
+[vue.html](https://hana-ame.github.io/gear-grid/vue.html) — Vue 3 via CDN, reactive setup, single self-contained HTML file.
+
 ## Deploy
 
 Hosted on [GitHub Pages](https://pages.github.com/) via legacy deployment (main branch → root).
