@@ -16,7 +16,7 @@
   <h1 class="demo-title">GEAR GRID</h1>
   <p class="demo-desc">
     Embeddable 2D gear selector component.<br>
-    Click the button in the <strong>bottom-right corner</strong> to open the selector.
+    <strong>Hover</strong> the button in the bottom-right corner to open the selector.
   </p>
   <div class="demo-hint">This is a demo page — the component can be embedded in any UI</div>
 </div>
@@ -28,29 +28,26 @@
   <span class="fab-dots" id="fab-dots"></span>
 </button>
 
-<!-- Dialog Overlay -->
-<div class="dialog-overlay" id="dialog-overlay">
-  <div class="dialog" role="dialog" aria-labelledby="dialog-title" aria-modal="true">
-    <div class="dialog-header">
-      <h2 class="dialog-title" id="dialog-title">SELECT GEAR</h2>
-      <button class="close-btn" id="close-btn" aria-label="Close dialog">×</button>
-    </div>
-    <p class="dialog-subtitle">luna / terra / sol / astra × low / medium / high</p>
+<!-- Dialog (anchored above FAB) -->
+<div class="dialog" id="dialog" role="dialog" aria-labelledby="dialog-title" aria-modal="false">
+  <div class="dialog-header">
+    <h2 class="dialog-title" id="dialog-title">SELECT GEAR</h2>
+  </div>
+  <p class="dialog-subtitle">luna / terra / sol / astra × low / medium / high</p>
 
-    <div class="shifter" id="shifter" role="grid" aria-label="2D gear selector">
-      <div class="stick" id="stick" aria-hidden="true"></div>
-    </div>
+  <div class="shifter" id="shifter" role="grid" aria-label="2D gear selector">
+    <div class="stick" id="stick" aria-hidden="true"></div>
+  </div>
 
-    <div class="readout">
-      <div class="readout-gear" id="readout-gear">—</div>
-      <div class="readout-name" id="readout-name">—</div>
-    </div>
+  <div class="readout">
+    <div class="readout-gear" id="readout-gear">—</div>
+    <div class="readout-name" id="readout-name">—</div>
+  </div>
 
-    <div class="legend">
-      <span><kbd>←</kbd><kbd>→</kbd><kbd>↑</kbd><kbd>↓</kbd> shift</span>
-      <span>click · drag</span>
-      <span><kbd>Esc</kbd> close</span>
-    </div>
+  <div class="legend">
+    <span><kbd>←</kbd><kbd>→</kbd><kbd>↑</kbd><kbd>↓</kbd> shift</span>
+    <span>click · drag</span>
+    <span><kbd>Esc</kbd> close</span>
   </div>
 </div>
 

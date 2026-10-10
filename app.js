@@ -35,8 +35,7 @@ const fab           = document.getElementById('fab');
 const fabGlyph      = document.getElementById('fab-glyph');
 const fabName       = document.getElementById('fab-name');
 const fabDots       = document.getElementById('fab-dots');
-const dialogOverlay = document.getElementById('dialog-overlay');
-const closeBtn      = document.getElementById('close-btn');
+const dialog        = document.getElementById('dialog');
 const shifter       = document.getElementById('shifter');
 const stick         = document.getElementById('stick');
 const readoutGear   = document.getElementById('readout-gear');
@@ -158,33 +157,56 @@ function updateFab() {
   fab.style.borderColor = elem.color + '60';
 }
 
-/* ============ Dialog ============ */
-function openDialog() {
-  dialogOverlay.classList.add('open');
+/* ============ Dialog (hover-intent) ============ */
+let closeTimer = null;
+let openSource = null; // 'mouse' or 'keyboard'
+
+function openDialog(source) {
+  clearTimeout(closeTimer);
+  dialog.classList.add('open');
   fab.setAttribute('aria-expanded', 'true');
-  requestAnimationFrame(() => {
-    shifter.querySelector('.cell.selected')?.focus();
-  });
+  openSource = source;
+  if (source !== 'mouse') {
+    requestAnimationFrame(() => {
+      shifter.querySelector('.cell.selected')?.focus();
+    });
+  }
 }
 
 function closeDialog() {
-  dialogOverlay.classList.remove('open');
+  clearTimeout(closeTimer);
+  dialog.classList.remove('open');
   fab.setAttribute('aria-expanded', 'false');
+  openSource = null;
   updateFab();
   fab.focus();
 }
 
-fab.addEventListener('click', openDialog);
-closeBtn.addEventListener('click', closeDialog);
+function scheduleClose() {
+  if (openSource !== 'mouse') return;
+  clearTimeout(closeTimer);
+  closeTimer = setTimeout(closeDialog, 250);
+}
 
-// Click outside dialog to close
-dialogOverlay.addEventListener('click', e => {
-  if (e.target === dialogOverlay) closeDialog();
+// Hover handlers (FAB + dialog)
+fab.addEventListener('mouseenter', () => openDialog('mouse'));
+fab.addEventListener('mouseleave', scheduleClose);
+dialog.addEventListener('mouseenter', () => openDialog('mouse'));
+dialog.addEventListener('mouseleave', scheduleClose);
+
+// Keyboard: Enter / Space on FAB to open
+fab.addEventListener('keydown', e => {
+  if (e.key === 'Enter' || e.key === ' ') {
+    e.preventDefault();
+    if (!dialog.classList.contains('open')) {
+      openDialog('keyboard');
+    }
+  }
 });
 
 // Escape to close
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && dialogOverlay.classList.contains('open')) {
+  if (e.key === 'Escape' && dialog.classList.contains('open')) {
     closeDialog();
   }
 });
@@ -241,7 +263,7 @@ function moveStickToPointer(e) {
 
 /* ============ Keyboard (grid navigation, only when dialog open) ============ */
 document.addEventListener('keydown', e => {
-  if (!dialogOverlay.classList.contains('open')) return;
+  if (!dialog.classList.contains('open')) return;
 
   const col = ELEMENTS.findIndex(el => el.key === current.element);
   const row = LEVELS.findIndex(l  => l.key  === current.level);
