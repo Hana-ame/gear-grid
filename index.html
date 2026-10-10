@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gear Grid · 2D Cosmic Shifter</title>
+<meta name="description" content="A 2D gear selector — low/medium/high × luna/terra/sol/astra. Click, drag, or use arrow keys.">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✦</text></svg>">
+</head>
+<body>
+<div class="stars" id="stars" aria-hidden="true"></div>
+
+<main class="panel">
+  <header class="panel-header">
+    <h1>GEAR GRID</h1>
+    <p class="subtitle"><em>low / medium / high</em> × <em>luna / terra / sol / astra</em></p>
+  </header>
+
+  <section class="shifter" id="shifter" role="grid" aria-label="2D gear selector">
+    <div class="stick" id="stick" aria-hidden="true"></div>
+  </section>
+
+  <section class="readout">
+    <div class="readout-gear" id="readout-gear" aria-live="polite">—</div>
+    <div class="readout-name" id="readout-name">Select a gear to engage</div>
+  </section>
+
+  <div class="legend">
+    <span><kbd>←</kbd><kbd>→</kbd><kbd>↑</kbd><kbd>↓</kbd> shift</span>
+    <span>click · drag to engage</span>
+  </div>
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>
