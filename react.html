@@ -143,46 +143,13 @@ function App() {
   function onCellClick(e) {
     const c = e.target.closest('.cell');
     if (!c) return;
-    select(c.dataset.col, c.dataset.row, false);
     closeDialog();
   }
 
-  function onPointerDown(e) {
+  function onCellEnter(e) {
     const c = e.target.closest('.cell');
     if (!c) return;
-    setDragging(true);
-    lastDrag.current = c;
-    stickRef.current.classList.add('dragging');
-    try { gridRef.current.setPointerCapture(e.pointerId); } catch (_) {}
-    select(c.dataset.col, c.dataset.row, true);
-    mvStick(e);
-  }
-
-  function onPointerMove(e) {
-    if (!dragging) return;
-    const el = document.elementFromPoint(e.clientX, e.clientY);
-    const c = el && el.closest('.cell');
-    if (c && c !== lastDrag.current) {
-      lastDrag.current = c;
-      select(c.dataset.col, c.dataset.row, true);
-    }
-    mvStick(e);
-  }
-
-  function endDrag() {
-    if (!dragging) return;
-    setDragging(false);
-    lastDrag.current = null;
-    stickRef.current.classList.remove('dragging');
-    updateStick();
-    closeDialog();
-  }
-
-  function mvStick(e) {
-    const gr = gridRef.current.getBoundingClientRect();
-    const s = stickRef.current;
-    s.style.left = (e.clientX - gr.left) + 'px';
-    s.style.top = (e.clientY - gr.top) + 'px';
+    select(c.dataset.col, c.dataset.row);
   }
 
   const ci = COLUMNS.indexOf(cur.col);
@@ -213,7 +180,7 @@ function App() {
         </span>
       </button>
       <div className={open ? 'dialog open' : 'dialog'} onMouseEnter={openDialog} onMouseLeave={scheduleClose} role="dialog" aria-modal="false">
-        <div ref={gridRef} className="grid" role="grid" aria-label="2D selector" style={{ '--cols': COLUMNS.length, '--rows': ROWS.length }} onClick={onCellClick} onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={endDrag} onPointerCancel={endDrag}>
+        <div ref={gridRef} className="grid" role="grid" aria-label="2D selector" style={{ '--cols': COLUMNS.length, '--rows': ROWS.length }} onClick={onCellClick} onMouseEnter={onCellEnter} onMouseOver={onCellEnter}>
           <div className="corner" />
           {COLUMNS.map((c, i) => <div key={'c' + i} className="alabel" role="columnheader">{c}</div>)}
           {ROWS.map((r, ri2) => [

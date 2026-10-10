@@ -209,40 +209,13 @@ if(e.key==='Escape'&&dlg.classList.contains('open'))close();
 grid.addEventListener('click',e=>{
 const c=e.target.closest('.cell');
 if(!c)return;
-select(c.dataset.col,c.dataset.row);
 close();
 });
-let drag=false,last=null;
-grid.addEventListener('pointerdown',e=>{
+grid.addEventListener('mouseover',e=>{
 const c=e.target.closest('.cell');
 if(!c)return;
-drag=true;last=c;
-stick.classList.add('dragging');
-try{grid.setPointerCapture(e.pointerId)}catch(_){}
-select(c.dataset.col,c.dataset.row,true);
-mv(e);
+select(c.dataset.col,c.dataset.row);
 });
-grid.addEventListener('pointermove',e=>{
-if(!drag)return;
-const el=document.elementFromPoint(e.clientX,e.clientY);
-const c=el&&el.closest('.cell');
-if(c&&c!==last){last=c;select(c.dataset.col,c.dataset.row,true)}
-mv(e);
-});
-function end(){
-if(!drag)return;
-drag=false;last=null;
-stick.classList.remove('dragging');
-updateStick();
-close();
-}
-document.addEventListener('pointerup',end);
-document.addEventListener('pointercancel',end);
-function mv(e){
-const gr=grid.getBoundingClientRect();
-stick.style.left=(e.clientX-gr.left)+'px';
-stick.style.top=(e.clientY-gr.top)+'px';
-}
 document.addEventListener('keydown',e=>{
 if(!dlg.classList.contains('open'))return;
 const ac=document.activeElement?.closest('.cell');

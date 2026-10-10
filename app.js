@@ -215,57 +215,18 @@ document.addEventListener('keydown', e => {
   }
 });
 
-/* ============ Click (grid cells — select then close) ============ */
+/* ============ Hover select + Click close ============ */
 shifter.addEventListener('click', e => {
   const cell = e.target.closest('.cell');
   if (!cell) return;
-  select(cell.dataset.element, cell.dataset.level);
   closeDialog();
 });
 
-/* ============ Drag (pointer events) ============ */
-let isDragging   = false;
-let lastDragCell = null;
-
-shifter.addEventListener('pointerdown', e => {
+shifter.addEventListener('mouseover', e => {
   const cell = e.target.closest('.cell');
   if (!cell) return;
-  isDragging   = true;
-  lastDragCell = cell;
-  stick.classList.add('dragging');
-  try { shifter.setPointerCapture(e.pointerId); } catch (_) {}
-  select(cell.dataset.element, cell.dataset.level, true);
-  moveStickToPointer(e);
+  select(cell.dataset.element, cell.dataset.level);
 });
-
-shifter.addEventListener('pointermove', e => {
-  if (!isDragging) return;
-  const el   = document.elementFromPoint(e.clientX, e.clientY);
-  const cell = el && el.closest('.cell');
-  if (cell && cell !== lastDragCell) {
-    lastDragCell = cell;
-    select(cell.dataset.element, cell.dataset.level, true);
-  }
-  moveStickToPointer(e);
-});
-
-function endDrag() {
-  if (!isDragging) return;
-  isDragging   = false;
-  lastDragCell = null;
-  stick.classList.remove('dragging');
-  updateStick();
-  closeDialog();
-}
-
-document.addEventListener('pointerup', endDrag);
-document.addEventListener('pointercancel', endDrag);
-
-function moveStickToPointer(e) {
-  const sRect = shifter.getBoundingClientRect();
-  stick.style.left = (e.clientX - sRect.left) + 'px';
-  stick.style.top  = (e.clientY - sRect.top)  + 'px';
-}
 
 /* ============ Keyboard (grid navigation — focus move only) ============ */
 document.addEventListener('keydown', e => {

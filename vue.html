@@ -71,7 +71,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-seri
 <span class="f-dots"><i v-for="(d,i) in ROWS.length" :key="i" :style="{background:i<dots?COLORS[ci]:'rgba(255,255,255,0.12)',boxShadow:i<dots?'0 0 3px '+COLORS[ci]:'none'}"></i></span>
 </button>
 <div class="dialog" :class="{open}" @mouseenter="openDialog" @mouseleave="scheduleClose" role="dialog" aria-modal="false">
-<div ref="gridRef" class="grid" role="grid" aria-label="2D selector" :style="{'--cols':COLUMNS.length,'--rows':ROWS.length}" @click="onCellClick" @pointerdown="onPointerDown" @pointermove="onPointerMove" @pointerup="endDrag" @pointercancel="endDrag">
+<div ref="gridRef" class="grid" role="grid" aria-label="2D selector" :style="{'--cols':COLUMNS.length,'--rows':ROWS.length}" @click="onCellClick" @mouseenter="onCellEnter" @mouseover="onCellEnter">
 <div class="corner"></div>
 <div v-for="(c,i) in COLUMNS" :key="'c'+i" class="alabel" role="columnheader">{{c}}</div>
 <template v-for="(r,ri) in ROWS" :key="'r'+ri">
@@ -171,42 +171,12 @@ if(t)t.focus();
 function onCellClick(e){
 const c=e.target.closest('.cell');
 if(!c)return;
-select(c.dataset.col,c.dataset.row,false);
 closeDialog();
 }
-function onPointerDown(e){
+function onCellEnter(e){
 const c=e.target.closest('.cell');
 if(!c)return;
-dragging.value=true;
-lastDrag=c;
-stickRef.value.classList.add('dragging');
-try{gridRef.value.setPointerCapture(e.pointerId);}catch(_){}
-select(c.dataset.col,c.dataset.row,true);
-mvStick(e);
-}
-function onPointerMove(e){
-if(!dragging.value)return;
-const el=document.elementFromPoint(e.clientX,e.clientY);
-const c=el&&el.closest('.cell');
-if(c&&c!==lastDrag){
-lastDrag=c;
-select(c.dataset.col,c.dataset.row,true);
-}
-mvStick(e);
-}
-function endDrag(){
-if(!dragging.value)return;
-dragging.value=false;
-lastDrag=null;
-stickRef.value.classList.remove('dragging');
-updateStick();
-closeDialog();
-}
-function mvStick(e){
-const gr=gridRef.value.getBoundingClientRect();
-const s=stickRef.value;
-s.style.left=(e.clientX-gr.left)+'px';
-s.style.top=(e.clientY-gr.top)+'px';
+select(c.dataset.col,c.dataset.row);
 }
 onMounted(()=>{
 document.addEventListener('keydown',onKey);
