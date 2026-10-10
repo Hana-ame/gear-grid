@@ -1,10 +1,17 @@
 # Gear Grid · 2D Cosmic Shifter
 
-A two-dimensional gear selector — a "shifter" with **luna / terra / sol / astra** on the X-axis and **low / medium / high** on the Y-axis. 12 distinct gear positions (4 × 3 grid), selectable by click, drag, or keyboard.
+An **embeddable 2D gear selector** — a bottom-right FAB button opens a popover dialog with a 4×3 grid. Select both **intensity** (low/medium/high) and **model** (luna/terra/sol/astra) simultaneously.
 
 ## Live Demo
 
 [Try it → hana-ame.github.io/gear-grid](https://hana-ame.github.io/gear-grid/)
+
+## How It Works
+
+1. A **pill-shaped button** sits in the bottom-right corner, showing the current gear (e.g. `☉ Solar Flare ●●●`)
+2. **Click the button** → a dialog pops up with the 2D grid selector
+3. **Select a gear** by click, drag, or keyboard
+4. **Close** via ×, outside click, or `Esc` → the button updates
 
 ## Gear Table
 
@@ -14,32 +21,85 @@ A two-dimensional gear selector — a "shifter" with **luna / terra / sol / astr
 | **MEDIUM** | Lunar Glow    | Earth Anchor  | Solar Flare  | Star Warden   |
 | **HIGH**   | Lunar Bloom   | Earth Fury    | Solar Impact | Star Nova     |
 
-## Controls
+## Controls (inside dialog)
 
 | Action          | Input                                             |
 |-----------------|---------------------------------------------------|
 | Select a gear   | Click any cell                                    |
-| Drag-shift      | Click & drag across cells — the stick follows     |
-| Keyboard nav    | `←` `→` `↑` `↓` to move (auto-engages selection) |
+| Drag-shift      | Click & drag across cells — stick follows pointer |
+| Keyboard nav    | `←` `→` `↑` `↓` to move, auto-engages selection |
+| Close dialog    | `Esc` / click outside / click ×                   |
 
 ## Features
 
+- **FAB trigger** — compact pill button showing current gear with glyph, name, and level dots
+- **Dialog popover** — centered modal with backdrop blur, spring-open animation
 - **12 gear combinations** — 4 cosmic elements × 3 intensity levels
 - **Cosmic theme** — each element has its own color and glyph (☾ ⊕ ☉ ✦)
-- **Shifter stick** — a glowing indicator that animates between cells
+- **Shifter stick** — glowing indicator that animates between cells
 - **Drag interaction** — pointer follows during drag, snaps to cell on release
-- **Keyboard navigation** — full arrow-key control with auto-engagement
+- **Keyboard navigation** — full arrow-key control, only active when dialog is open
 - **Responsive** — works on mobile and desktop
 - **Pure frontend** — HTML + CSS + JS, zero dependencies, zero backend
+
+## Embedding
+
+Copy the three files into your project:
+
+```bash
+cp index.html style.css app.js /path/to/your/project/
+```
+
+Then add to your page:
+
+```html
+<!-- Link CSS (in <head>) -->
+<link rel="stylesheet" href="style.css">
+
+<!-- Add to <body> (after your content) -->
+<div class="stars" id="stars" aria-hidden="true"></div>
+<button class="fab" id="fab" aria-haspopup="dialog" aria-expanded="false">
+  <span class="fab-glyph" id="fab-glyph">☉</span>
+  <span class="fab-name" id="fab-name">Solar Flare</span>
+  <span class="fab-dots" id="fab-dots"></span>
+</button>
+<div class="dialog-overlay" id="dialog-overlay">
+  <div class="dialog" role="dialog" aria-labelledby="dialog-title" aria-modal="true">
+    <div class="dialog-header">
+      <h2 class="dialog-title" id="dialog-title">SELECT GEAR</h2>
+      <button class="close-btn" id="close-btn" aria-label="Close dialog">×</button>
+    </div>
+    <p class="dialog-subtitle">luna / terra / sol / astra × low / medium / high</p>
+    <div class="shifter" id="shifter" role="grid" aria-label="2D gear selector">
+      <div class="stick" id="stick" aria-hidden="true"></div>
+    </div>
+    <div class="readout">
+      <div class="readout-gear" id="readout-gear">—</div>
+      <div class="readout-name" id="readout-name">—</div>
+    </div>
+    <div class="legend">
+      <span><kbd>←</kbd><kbd>→</kbd><kbd>↑</kbd><kbd>↓</kbd> shift</span>
+      <span>click · drag</span>
+      <span><kbd>Esc</kbd> close</span>
+    </div>
+  </div>
+</div>
+
+<!-- Load JS (before </body>) -->
+<script src="app.js"></script>
+```
+
+> **Note:** The component uses CSS custom properties (`--luna`, `--terra`, `--sol`, `--astra`, `--accent`, etc.) for theming. Override them in your own CSS to match your design.
 
 ## Files
 
 ```
 gear-grid/
-├── index.html    # Page structure
-├── style.css     # Cosmic theme, grid layout, animations
-├── app.js        # Data, selection, keyboard, drag, stars
-└── README.md     # This file
+├── index.html    # Demo page with FAB + dialog
+├── style.css     # All styles: stars, FAB, dialog, grid, cells, stick
+├── app.js        # Data, grid build, selection, dialog, keyboard, drag
+├── README.md     # This file
+└── LICENSE       # MIT
 ```
 
 ## Tech Stack
@@ -47,9 +107,9 @@ gear-grid/
 - Pure HTML5 / CSS3 / Vanilla JavaScript (ES2022)
 - No frameworks, no build step, no dependencies
 - CSS Grid for layout, CSS custom properties for theming
-- CSS animations for stars, stick pulse, and readout flash
+- CSS animations for stars, stick pulse, flash, dialog spring-open
 - Pointer Events API for unified mouse / touch / pen drag
-- ARIA grid roles for accessibility
+- ARIA dialog + grid roles for accessibility
 
 ## Deploy
 

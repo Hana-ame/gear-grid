@@ -28,29 +28,19 @@ const GEAR_NAMES = {
 };
 
 /* ============ State ============ */
-const GEAR_DESC = {
-  'luna-low':    'Faint moonlight brushes the darkness.',
-  'luna-medium': 'Silver radiance glows across the void.',
-  'luna-high':   'The moon blooms in brilliant silver fire.',
-  'terra-low':   'A quiet shield of stone stands guard.',
-  'terra-medium':'Rooted deep, the earth holds firm.',
-  'terra-high':  'Tectonic fury shatters the ground.',
-  'sol-low':     'Dawn light creeps over the horizon.',
-  'sol-medium':  'A golden flare dances through the sky.',
-  'sol-high':    'Solar impact — blinding, searing, absolute.',
-  'astra-low':   'Distant stars drift in silent silence.',
-  'astra-medium':'A star warden watches over the realm.',
-  'astra-high':  'Supernova — the birth of a new cosmos.',
-};
-
 let current = { element: 'sol', level: 'medium' };
 
 /* ============ DOM ============ */
-const shifter     = document.getElementById('shifter');
-const stick       = document.getElementById('stick');
-const readoutGear = document.getElementById('readout-gear');
-const readoutName = document.getElementById('readout-name');
-const readoutDetail = document.getElementById('readout-detail');
+const fab           = document.getElementById('fab');
+const fabGlyph      = document.getElementById('fab-glyph');
+const fabName       = document.getElementById('fab-name');
+const fabDots       = document.getElementById('fab-dots');
+const dialogOverlay = document.getElementById('dialog-overlay');
+const closeBtn      = document.getElementById('close-btn');
+const shifter       = document.getElementById('shifter');
+const stick         = document.getElementById('stick');
+const readoutGear   = document.getElementById('readout-gear');
+const readoutName   = document.getElementById('readout-name');
 
 /* ============ Build Shifter Grid ============ */
 // Corner (empty cell for grid alignment)
@@ -58,7 +48,7 @@ const corner = document.createElement('div');
 corner.className = 'corner';
 shifter.appendChild(corner);
 
-// X-axis labels (column headers)
+// X-axis labels (column headers) — elements
 ELEMENTS.forEach(elem => {
   const label = document.createElement('div');
   label.className = 'axis-label';
@@ -67,7 +57,7 @@ ELEMENTS.forEach(elem => {
   shifter.appendChild(label);
 });
 
-// Y-axis labels + cells (row by row)
+// Y-axis labels + cells — levels as rows, elements as columns
 LEVELS.forEach(level => {
   const yLabel = document.createElement('div');
   yLabel.className = 'axis-label y-label';
@@ -128,14 +118,11 @@ function updateCells() {
 function updateReadout() {
   const key = `${current.element}-${current.level}`;
   const gearName = GEAR_NAMES[key];
-  const desc = GEAR_DESC[key] || '';
   const elem  = ELEMENTS.find(e => e.key === current.element);
   const level = LEVELS.find(l  => l.key === current.level);
   readoutGear.textContent = `${elem.glyph}  ${gearName}`;
   readoutGear.style.color = elem.color;
   readoutName.textContent = `${elem.name} \u00B7 ${level.name}`;
-  readoutDetail.textContent = desc;
-  // flash animation
   readoutGear.classList.remove('flash');
   void readoutGear.offsetHeight;
   readoutGear.classList.add('flash');
@@ -150,7 +137,59 @@ function updateStick() {
   stick.style.top  = (cRect.top  - sRect.top  + cRect.height / 2) + 'px';
 }
 
-/* ============ Click ============ */
+/* ============ FAB Button ============ */
+function updateFab() {
+  const key = `${current.element}-${current.level}`;
+  const elem  = ELEMENTS.find(e => e.key === current.element);
+  const level = LEVELS.find(l  => l.key === current.level);
+  const gearName = GEAR_NAMES[key];
+
+  fabGlyph.textContent = elem.glyph;
+  fabGlyph.style.color = elem.color;
+  fabName.textContent = gearName;
+
+  fabDots.innerHTML = '';
+  for (let i = 0; i < 3; i++) {
+    const dot = document.createElement('span');
+    dot.className = 'dot' + (i < level.dots ? ' on' : '');
+    fabDots.appendChild(dot);
+  }
+
+  fab.style.borderColor = elem.color + '60';
+}
+
+/* ============ Dialog ============ */
+function openDialog() {
+  dialogOverlay.classList.add('open');
+  fab.setAttribute('aria-expanded', 'true');
+  requestAnimationFrame(() => {
+    shifter.querySelector('.cell.selected')?.focus();
+  });
+}
+
+function closeDialog() {
+  dialogOverlay.classList.remove('open');
+  fab.setAttribute('aria-expanded', 'false');
+  updateFab();
+  fab.focus();
+}
+
+fab.addEventListener('click', openDialog);
+closeBtn.addEventListener('click', closeDialog);
+
+// Click outside dialog to close
+dialogOverlay.addEventListener('click', e => {
+  if (e.target === dialogOverlay) closeDialog();
+});
+
+// Escape to close
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && dialogOverlay.classList.contains('open')) {
+    closeDialog();
+  }
+});
+
+/* ============ Click (grid cells) ============ */
 shifter.addEventListener('click', e => {
   const cell = e.target.closest('.cell');
   if (!cell) return;
@@ -188,7 +227,7 @@ function endDrag() {
   isDragging   = false;
   lastDragCell = null;
   stick.classList.remove('dragging');
-  updateStick(); // snap to cell center
+  updateStick();
 }
 
 document.addEventListener('pointerup', endDrag);
@@ -200,18 +239,20 @@ function moveStickToPointer(e) {
   stick.style.top  = (e.clientY - sRect.top)  + 'px';
 }
 
-/* ============ Keyboard ============ */
+/* ============ Keyboard (grid navigation, only when dialog open) ============ */
 document.addEventListener('keydown', e => {
+  if (!dialogOverlay.classList.contains('open')) return;
+
   const col = ELEMENTS.findIndex(el => el.key === current.element);
   const row = LEVELS.findIndex(l  => l.key  === current.level);
 
   let newCol = col, newRow = row;
 
   switch (e.key) {
-    case 'ArrowLeft':  newCol = Math.max(0, col - 1);           break;
-    case 'ArrowRight': newCol = Math.min(ELEMENTS.length - 1, col + 1);  break;
-    case 'ArrowUp':    newRow = Math.max(0, row - 1);           break;
-    case 'ArrowDown':  newRow = Math.min(LEVELS.length - 1, row + 1); break;
+    case 'ArrowLeft':  newCol = Math.max(0, col - 1);                        break;
+    case 'ArrowRight': newCol = Math.min(ELEMENTS.length - 1, col + 1);      break;
+    case 'ArrowUp':    newRow = Math.max(0, row - 1);                        break;
+    case 'ArrowDown':  newRow = Math.min(LEVELS.length - 1, row + 1);        break;
     default: return;
   }
 
@@ -223,7 +264,7 @@ document.addEventListener('keydown', e => {
 
 /* ============ Stars ============ */
 const starsEl = document.getElementById('stars');
-for (let i = 0; i < 120; i++) {
+for (let i = 0; i < 100; i++) {
   const s = document.createElement('div');
   s.className = 'star';
   const size = Math.random() * 2 + 0.5;
@@ -245,7 +286,8 @@ window.addEventListener('resize', () => {
 function init() {
   updateCells();
   updateReadout();
-  // position stick without animation on first load
+  updateFab();
+  // Position stick without animation on first load
   stick.style.transition = 'none';
   updateStick();
   requestAnimationFrame(() => {

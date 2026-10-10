@@ -4,36 +4,55 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Gear Grid · 2D Cosmic Shifter</title>
-<meta name="description" content="A 2D gear selector — low/medium/high × luna/terra/sol/astra. Click, drag, or use arrow keys.">
+<meta name="description" content="Embeddable 2D gear selector — bottom-right FAB button opens a popover dialog with a 4×3 grid (luna/terra/sol/astra × low/medium/high).">
 <link rel="stylesheet" href="style.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✦</text></svg>">
 </head>
 <body>
 <div class="stars" id="stars" aria-hidden="true"></div>
 
-<main class="panel">
-  <header class="panel-header">
-    <h1>GEAR GRID</h1>
-    <p class="subtitle"><em>luna / terra / sol / astra</em> × <em>low / medium / high</em></p>
-  </header>
+<!-- Demo content -->
+<div class="demo">
+  <h1 class="demo-title">GEAR GRID</h1>
+  <p class="demo-desc">
+    Embeddable 2D gear selector component.<br>
+    Click the button in the <strong>bottom-right corner</strong> to open the selector.
+  </p>
+  <div class="demo-hint">This is a demo page — the component can be embedded in any UI</div>
+</div>
 
-  <section class="shifter" id="shifter" role="grid" aria-label="2D gear selector">
-    <div class="stick" id="stick" aria-hidden="true"></div>
-  </section>
+<!-- Floating Action Button (bottom-right) -->
+<button class="fab" id="fab" aria-haspopup="dialog" aria-expanded="false">
+  <span class="fab-glyph" id="fab-glyph">☉</span>
+  <span class="fab-name" id="fab-name">Solar Flare</span>
+  <span class="fab-dots" id="fab-dots"></span>
+</button>
 
-  <section class="readout">
-    <div class="readout-gear" id="readout-gear" aria-live="polite">—</div>
-    <div class="readout-name" id="readout-name">Select a gear to engage</div>
-    <div class="readout-detail" id="readout-detail"></div>
-  </section>
+<!-- Dialog Overlay -->
+<div class="dialog-overlay" id="dialog-overlay">
+  <div class="dialog" role="dialog" aria-labelledby="dialog-title" aria-modal="true">
+    <div class="dialog-header">
+      <h2 class="dialog-title" id="dialog-title">SELECT GEAR</h2>
+      <button class="close-btn" id="close-btn" aria-label="Close dialog">×</button>
+    </div>
+    <p class="dialog-subtitle">luna / terra / sol / astra × low / medium / high</p>
 
-  <div class="hover-hint">ⓘ hover to explore</div>
+    <div class="shifter" id="shifter" role="grid" aria-label="2D gear selector">
+      <div class="stick" id="stick" aria-hidden="true"></div>
+    </div>
 
-  <div class="legend">
-    <span><kbd>←</kbd><kbd>→</kbd><kbd>↑</kbd><kbd>↓</kbd> shift</span>
-    <span>click · drag to engage</span>
+    <div class="readout">
+      <div class="readout-gear" id="readout-gear">—</div>
+      <div class="readout-name" id="readout-name">—</div>
+    </div>
+
+    <div class="legend">
+      <span><kbd>←</kbd><kbd>→</kbd><kbd>↑</kbd><kbd>↓</kbd> shift</span>
+      <span>click · drag</span>
+      <span><kbd>Esc</kbd> close</span>
+    </div>
   </div>
-</main>
+</div>
 
 <script src="app.js"></script>
 </body>
