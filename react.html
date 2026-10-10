@@ -212,7 +212,7 @@ function App() {
           ))}
         </span>
       </button>
-      <div className=`dialog${open ? ' open' : ''}` onMouseEnter={openDialog} onMouseLeave={scheduleClose} role="dialog" aria-modal="false">
+      <div className={open ? 'dialog open' : 'dialog'} onMouseEnter={openDialog} onMouseLeave={scheduleClose} role="dialog" aria-modal="false">
         <div ref={gridRef} className="grid" role="grid" aria-label="2D selector" style={{ '--cols': COLUMNS.length, '--rows': ROWS.length }} onClick={onCellClick} onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={endDrag} onPointerCancel={endDrag}>
           <div className="corner" />
           {COLUMNS.map((c, i) => <div key={'c' + i} className="alabel" role="columnheader">{c}</div>)}
@@ -233,7 +233,7 @@ function App() {
               );
             })
           ])}
-          <div ref={stickRef} className=`stick${dragging ? ' dragging' : ''}` aria-hidden="true" />
+          <div ref={stickRef} className={dragging ? 'stick dragging' : 'stick'} aria-hidden="true" />
         </div>
         <div className="readout">
           <div className="gear" style={{ color: COLORS[ci] }}>{GLYPHS[ci]}  {cur.col}·{cur.row}</div>
