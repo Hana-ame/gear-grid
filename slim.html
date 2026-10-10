@@ -68,7 +68,7 @@ const COLUMNS=['luna','terra','sol','astra'];
 const ROWS=['high','medium','low'];
 const COLORS=['#9fb4d4','#7fb07a','#f0a040','#b48ce0'];
 const GLYPHS=['☾','⊕','☉','✦'];
-let cur={col:'sol',row:'medium'};
+let cur={col:'',row:''};
 const fab=document.getElementById('fab');
 const dlg=document.getElementById('dialog');
 let ct=null;
@@ -255,7 +255,7 @@ s.style.animationDuration=(2+Math.random()*4)+'s';
 sc.appendChild(s);
 }
 window.addEventListener('resize',()=>requestAnimationFrame(updateStick));
-select(cur.col,cur.row);
+select(COLUMNS[2],ROWS[1]);
 updateStick();
 stick.style.transition='none';
 requestAnimationFrame(()=>requestAnimationFrame(()=>stick.style.transition=''));
