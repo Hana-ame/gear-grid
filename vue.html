@@ -56,7 +56,46 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-seri
 </style>
 </head>
 <body>
-<div id="app"></div>
+<div id="app">
+<div class="stars">
+<div v-for="(s,i) in stars" :key="i" class="star" :style="{width:s.size+'px',height:s.size+'px',left:s.left+'%',top:s.top+'%',animationDelay:s.delay+'s',animationDuration:s.duration+'s'}"></div>
+</div>
+<div class="demo">
+<h1>GEAR GRID · VUE</h1>
+<p>Data-driven 2D gear selector.</p>
+<small>COLUMNS × ROWS = auto grid</small>
+</div>
+<button class="fab" @click="open?closeDialog():openDialog()" @mouseenter="openDialog" @mouseleave="scheduleClose" aria-haspopup="dialog" :aria-expanded="open?'true':'false'">
+<span class="f-glyph" :style="{color:COLORS[ci]}">{{GLYPHS[ci]}}</span>
+<span>{{cur.col}}·{{cur.row}}</span>
+<span class="f-dots"><i v-for="(d,i) in ROWS.length" :key="i" :style="{background:i<dots?COLORS[ci]:'rgba(255,255,255,0.12)',boxShadow:i<dots?'0 0 3px '+COLORS[ci]:'none'}"></i></span>
+</button>
+<div class="dialog" :class="{open}" @mouseenter="openDialog" @mouseleave="scheduleClose" role="dialog" aria-modal="false">
+<div ref="gridRef" class="grid" role="grid" aria-label="2D selector" :style="{'--cols':COLUMNS.length,'--rows':ROWS.length}" @click="onCellClick" @pointerdown="onPointerDown" @pointermove="onPointerMove" @pointerup="endDrag" @pointercancel="endDrag">
+<div class="corner"></div>
+<div v-for="(c,i) in COLUMNS" :key="'c'+i" class="alabel" role="columnheader">{{c}}</div>
+<template v-for="(r,ri) in ROWS" :key="'r'+ri">
+<div class="alabel ylabel" role="rowheader">{{r}}</div>
+<button v-for="(c,ci) in COLUMNS" :key="'cell'+ci+ri" type="button" class="cell" :class="{selected:cur.col===c&&cur.row===r,'hl-row':!(cur.col===c&&cur.row===r)&&cur.row===r,'hl-col':!(cur.col===c&&cur.row===r)&&cur.col===c}" :data-col="c" :data-row="r" :style="{color:COLORS[ci],background:'rgba('+COLORS[ci].slice(1).match(/.{2}/g).map(h=>parseInt(h,16)).join(',')+',0.04)'}" role="gridcell" :aria-label="c+'·'+r" :aria-selected="cur.col===c&&cur.row===r?'true':'false'">
+<div class="glyph">{{GLYPHS[ci]}}</div>
+<div class="name">{{c}}·{{r}}</div>
+<div class="dots"><i v-for="(d,di) in ROWS.length" :key="di" :class="{on:di<(ROWS.length-ri)}"></i></div>
+</button>
+</template>
+<div ref="stickRef" class="stick" :class="{dragging}" aria-hidden="true"></div>
+</div>
+<div class="readout">
+<div class="gear" :style="{color:COLORS[ci]}">{{GLYPHS[ci]}}  {{cur.col}}·{{cur.row}}</div>
+<div class="sub">{{cur.col}} · {{cur.row}}</div>
+</div>
+<div class="legend">
+<span><kbd>←</kbd><kbd>→</kbd><kbd>↑</kbd><kbd>↓</kbd> move</span>
+<span><kbd>⏎</kbd> confirm</span>
+<span>hover · click · drag</span>
+<span><kbd>Esc</kbd> close</span>
+</div>
+</div>
+</div>
 <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
 <script>
 const{createApp,ref,reactive,computed,onMounted,onUnmounted,watch,nextTick}=Vue;
@@ -188,46 +227,5 @@ return{COLUMNS,ROWS,COLORS,GLYPHS,cur,open,dragging,gridRef,stickRef,select,open
 }
 }).mount('#app');
 </script>
-<template>
-<div class="stars">
-<div v-for="(s,i) in stars" :key="i" class="star" :style="{width:s.size+'px',height:s.size+'px',left:s.left+'%',top:s.top+'%',animationDelay:s.delay+'s',animationDuration:s.duration+'s'}"></div>
-</div>
-<div class="demo">
-<h1>GEAR GRID · VUE</h1>
-<p>Data-driven 2D gear selector.</p>
-<small>COLUMNS × ROWS = auto grid</small>
-</div>
-<button class="fab" @click="open?closeDialog():openDialog()" @mouseenter="openDialog" @mouseleave="scheduleClose" aria-haspopup="dialog" :aria-expanded="open?'true':'false'">
-<span class="f-glyph" :style="{color:COLORS[ci]}">{{GLYPHS[ci]}}</span>
-<span>{{cur.col}}·{{cur.row}}</span>
-<span class="f-dots"><i v-for="(d,i) in ROWS.length" :key="i" :style="{background:i<dots?COLORS[ci]:'rgba(255,255,255,0.12)',boxShadow:i<dots?'0 0 3px '+COLORS[ci]:'none'}"></i></span>
-</button>
-<div class="dialog" :class="{open}" @mouseenter="openDialog" @mouseleave="scheduleClose" role="dialog" aria-modal="false">
-<div ref="gridRef" class="grid" role="grid" aria-label="2D selector" :style="{'--cols':COLUMNS.length,'--rows':ROWS.length}" @click="onCellClick" @pointerdown="onPointerDown" @pointermove="onPointerMove" @pointerup="endDrag" @pointercancel="endDrag">
-<div class="corner"></div>
-<div v-for="(c,i) in COLUMNS" :key="'c'+i" class="alabel" role="columnheader">{{c}}</div>
-<template v-for="(r,ri) in ROWS" :key="'r'+ri">
-<div class="alabel ylabel" role="rowheader">{{r}}</div>
-<button v-for="(c,ci) in COLUMNS" :key="'cell'+ci+ri" type="button" class="cell" :class="{selected:cur.col===c&&cur.row===r,'hl-row':!(cur.col===c&&cur.row===r)&&cur.row===r,'hl-col':!(cur.col===c&&cur.row===r)&&cur.col===c}" :data-col="c" :data-row="r" :style="{color:COLORS[ci],background:'rgba('+COLORS[ci].slice(1).match(/.{2}/g).map(h=>parseInt(h,16)).join(',')+',0.04)'}" role="gridcell" :aria-label="c+'·'+r" :aria-selected="cur.col===c&&cur.row===r?'true':'false'">
-<div class="glyph">{{GLYPHS[ci]}}</div>
-<div class="name">{{c}}·{{r}}</div>
-<div class="dots"><i v-for="(d,di) in ROWS.length" :key="di" :class="{on:di<(ROWS.length-ri)}"></i></div>
-</button>
-</template>
-<div ref="stickRef" class="stick" :class="{dragging}" aria-hidden="true"></div>
-</div>
-<div class="readout">
-<div class="gear" :style="{color:COLORS[ci]}">{{GLYPHS[ci]}}  {{cur.col}}·{{cur.row}}</div>
-<div class="sub">{{cur.col}} · {{cur.row}}</div>
-</div>
-<div class="legend">
-<span><kbd>←</kbd><kbd>→</kbd><kbd>↑</kbd><kbd>↓</kbd> move</span>
-<span><kbd>⏎</kbd> confirm</span>
-<span>hover · click · drag</span>
-<span><kbd>Esc</kbd> close</span>
-</div>
-</div>
-</div>
-</template>
 </body>
 </html>
