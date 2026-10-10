@@ -166,6 +166,9 @@ function openDialog() {
   clearTimeout(closeTimer);
   dialog.classList.add('open');
   fab.setAttribute('aria-expanded', 'true');
+  requestAnimationFrame(() => {
+    shifter.querySelector('.cell.selected')?.focus();
+  });
 }
 
 function closeDialog() {
