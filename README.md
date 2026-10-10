@@ -111,6 +111,35 @@ gear-grid/
 - Pointer Events API for unified mouse / touch / pen drag
 - ARIA dialog + grid roles for accessibility
 
+## Slim Version
+
+A zero-comment, data-driven single-file version: [slim.html](https://hana-ame.github.io/gear-grid/slim.html)
+
+Configure the grid with two arrays — the cartesian product auto-generates all cells:
+
+```js
+const COLUMNS = ['luna', 'terra', 'sol', 'astra'];  // x-axis
+const ROWS    = ['high', 'medium', 'low'];           // y-axis (first = top)
+```
+
+Each cell displays `col·row` (e.g. `sol·medium`) when selected. No hardcoded names, no GEAR_NAMES/GEAR_DESC — just axes.
+
+### Axes reference
+
+| `COLUMNS` | `ROWS` | Cell display |
+|-----------|--------|--------------|
+| `luna` | `high` | `luna·high` |
+| `sol` | `medium` | `sol·medium` |
+| `astra` | `low` | `astra·low` |
+
+### Colors
+
+Colors are auto-assigned per column from `COLORS[]`. Dots per row: `ROWS.length - index` (first row = max dots).
+
+### File size
+
+`slim.html` is a single self-contained file (~5 KB) with inline CSS + JS. No external dependencies, zero build step.
+
 ## Deploy
 
 Hosted on [GitHub Pages](https://pages.github.com/) via legacy deployment (main branch → root).

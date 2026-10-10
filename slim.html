@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gear Grid · Slim</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#05050f;--fg:#e8ecf5;--muted:#6b7394}
+html,body{height:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;color:var(--fg);background:radial-gradient(ellipse at 50% 0%,#1a1a3e 0%,#0a0a1c 40%,var(--bg) 100%);overflow:hidden}
+.stars{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.star{position:absolute;background:#fff;border-radius:50%;opacity:.3;animation:tw 3s ease-in-out infinite}
+@keyframes tw{0%,100%{opacity:.15;transform:scale(1)}50%{opacity:.7;transform:scale(1.3)}}
+.demo{position:relative;z-index:1;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px}
+.demo h1{font-size:32px;font-weight:200;letter-spacing:10px;padding-left:10px;background:linear-gradient(135deg,#9fb4d4,#b48ce0);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:12px}
+.demo p{color:var(--muted);font-size:13px;line-height:1.7;max-width:380px}
+.demo small{display:block;margin-top:24px;padding:8px 16px;border-radius:8px;border:1px dashed rgba(180,140,224,.2);color:var(--muted);font-size:10px;letter-spacing:1px}
+.fab{position:fixed;bottom:24px;right:24px;z-index:100;display:flex;align-items:center;gap:8px;padding:10px 16px;border-radius:24px;border:1px solid rgba(255,255,255,.15);background:rgba(14,14,32,.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:var(--fg);font-size:13px;font-weight:500;font-family:inherit;cursor:pointer;transition:all .3s cubic-bezier(.34,1.4,.64,1);box-shadow:0 8px 32px rgba(0,0,0,.4)}
+.fab:hover{transform:translateY(-2px) scale(1.02);box-shadow:0 12px 40px rgba(0,0,0,.5)}
+.fab span:first-child{font-weight:600;letter-spacing:.5px}
+.dialog{position:fixed;bottom:80px;right:24px;z-index:200;width:min(520px,calc(100vw - 48px));max-height:calc(100vh - 130px);overflow-y:auto;background:rgba(14,14,32,.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:24px;box-shadow:0 32px 64px -12px rgba(0,0,0,.6);transform-origin:bottom right;transform:scale(.92) translateY(10px);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .25s,visibility 0s .25s,transform .3s}
+.dialog.open{opacity:1;visibility:visible;pointer-events:auto;transform:scale(1) translateY(0);transition:opacity .25s,visibility 0s 0s,transform .35s cubic-bezier(.34,1.4,.64,1)}
+.grid{display:grid;grid-template-columns:36px repeat(var(--cols),1fr);grid-template-rows:auto repeat(var(--rows),1fr);gap:5px;height:280px;position:relative}
+.corner{}
+.alabel{display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:9px;font-weight:500;letter-spacing:2px;text-transform:uppercase}
+.alabel.ylabel{writing-mode:vertical-rl;transform:rotate(180deg)}
+.cell{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:8px;border:1px solid rgba(255,255,255,.05);background:rgba(255,255,255,.02);cursor:pointer;transition:all .25s cubic-bezier(.4,0,.2,1);overflow:hidden;user-select:none;-webkit-user-select:none;touch-action:none;-webkit-tap-highlight-color:transparent}
+.cell::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,currentColor 0%,transparent 70%);opacity:0;transition:opacity .3s;pointer-events:none}
+.cell:hover{border-color:rgba(255,255,255,.2);transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.3)}
+.cell:hover::before{opacity:.12}
+.cell:focus-visible{outline:2px solid rgba(255,255,255,.6);outline-offset:2px}
+.cell .glyph{font-size:18px;line-height:1;margin-bottom:2px;filter:drop-shadow(0 0 4px currentColor);z-index:1}
+.cell .name{font-size:8px;font-weight:600;letter-spacing:1px;text-transform:uppercase;opacity:0;transition:opacity .2s;z-index:1;text-align:center;line-height:1.2}
+.cell.selected .name{opacity:.9}
+.cell .dots{display:flex;gap:2px;margin-top:4px;z-index:1}
+.cell .dots i{width:4px;height:4px;border-radius:50%;background:rgba(255,255,255,.12);transition:all .3s}
+.cell .dots i.on{background:currentColor;box-shadow:0 0 3px currentColor}
+.cell.selected{border-color:currentColor;opacity:1;transform:scale(1.05);box-shadow:0 0 20px currentColor,0 0 40px currentColor,inset 0 0 10px rgba(255,255,255,.1);z-index:2}
+.cell.selected::before{opacity:.2}
+.cell.hl-row{border-color:rgba(255,255,255,.25);background:rgba(255,255,255,.07);opacity:.8}
+.cell.hl-col{border-color:currentColor;background:rgba(255,255,255,.05);opacity:.8;box-shadow:inset 0 0 8px currentColor}
+.stick{position:absolute;width:18px;height:18px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fff,#b48ce0 60%,transparent);box-shadow:0 0 14px #b48ce0,0 0 28px #b48ce0;pointer-events:none;transition:left .4s cubic-bezier(.34,1.4,.64,1),top .4s cubic-bezier(.34,1.4,.64,1);z-index:10;transform:translate(-50%,-50%);opacity:.9}
+.stick.dragging{width:22px;height:22px}
+.stick::after{content:"";position:absolute;inset:-3px;border-radius:50%;border:1px solid #b48ce0;opacity:.4;animation:pr 2s ease-out infinite}
+@keyframes pr{0%{transform:scale(1);opacity:.4}100%{transform:scale(2);opacity:0}}
+.readout{margin-top:20px;padding-top:16px;border-top:1px solid rgba(255,255,255,.06);text-align:center}
+.readout .gear{font-size:22px;font-weight:200;letter-spacing:2px;margin-bottom:2px;transition:color .4s;min-height:28px}
+.readout .gear.flash{animation:fl .4s ease-out}
+@keyframes fl{0%{transform:scale(1)}30%{transform:scale(1.08)}100%{transform:scale(1)}}
+.readout .sub{color:var(--muted);font-size:10px;letter-spacing:2px;text-transform:uppercase}
+.legend{display:flex;justify-content:center;gap:16px;margin-top:16px;color:var(--muted);font-size:8px;letter-spacing:2px;text-transform:uppercase;flex-wrap:wrap}
+.legend kbd{display:inline-block;padding:1px 4px;border-radius:3px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);font-family:ui-monospace,monospace;font-size:7px;margin:0 1px;letter-spacing:0}
+@media(max-width:520px){.demo h1{font-size:24px;letter-spacing:7px}.demo p{font-size:12px}.dialog{padding:16px;bottom:64px;right:16px;width:calc(100vw - 32px);max-height:calc(100vh - 90px)}.grid{height:240px;grid-template-columns:30px repeat(var(--cols),1fr)}.cell .glyph{font-size:15px}.readout .gear{font-size:18px}.fab{bottom:16px;right:16px;padding:8px 14px;font-size:12px}}
+</style>
+</head>
+<body>
+<div class="stars" id="stars"></div>
+<div class="demo">
+<h1>GEAR GRID · SLIM</h1>
+<p>Data-driven 2D gear selector.<br>Hover the bottom-right button to open.</p>
+<small>COLUMNS × ROWS = auto grid</small>
+</div>
+<button class="fab" id="fab" aria-haspopup="dialog" aria-expanded="false"></button>
+<div class="dialog" id="dialog" role="dialog" aria-modal="false"></div>
+<script>
+const COLUMNS=['luna','terra','sol','astra'];
+const ROWS=['high','medium','low'];
+const COLORS=['#9fb4d4','#7fb07a','#f0a040','#b48ce0'];
+const GLYPHS=['☾','⊕','☉','✦'];
+let cur={col:'sol',row:'medium'};
+const fab=document.getElementById('fab');
+const dlg=document.getElementById('dialog');
+let ct=null;
+function build(){
+const g=document.createElement('div');
+g.className='grid';
+g.style.setProperty('--cols',COLUMNS.length);
+g.style.setProperty('--rows',ROWS.length);
+g.setAttribute('role','grid');
+g.setAttribute('aria-label','2D selector');
+g.appendChild(Object.assign(document.createElement('div'),{className:'corner'}));
+COLUMNS.forEach((c,i)=>{
+const l=document.createElement('div');
+l.className='alabel';l.textContent=c;l.setAttribute('role','columnheader');
+g.appendChild(l);
+});
+ROWS.forEach((r,ri)=>{
+const yl=document.createElement('div');
+yl.className='alabel ylabel';yl.textContent=r;yl.setAttribute('role','rowheader');
+g.appendChild(yl);
+COLUMNS.forEach((c,ci)=>{
+const cell=document.createElement('button');
+cell.type='button';cell.className='cell';
+cell.dataset.col=c;cell.dataset.row=r;
+cell.setAttribute('role','gridcell');
+cell.setAttribute('aria-label',c+'·'+r);
+cell.setAttribute('aria-selected','false');
+cell.style.color=COLORS[ci];
+cell.style.background='rgba('+COLORS[ci].slice(1).match(/.{2}/g).map(h=>parseInt(h,16)).join(',')+',0.04)';
+const gl=document.createElement('div');
+gl.className='glyph';gl.textContent=GLYPHS[ci];
+const nm=document.createElement('div');
+nm.className='name';nm.textContent=c+'·'+r;
+const dt=document.createElement('div');
+dt.className='dots';
+const dots=ROWS.length-ri;
+for(let d=0;d<ROWS.length;d++){
+const i=document.createElement('i');
+if(d<dots)i.className='on';
+dt.appendChild(i);
+}
+cell.append(gl,nm,dt);
+g.appendChild(cell);
+});
+});
+const st=document.createElement('div');
+st.className='stick';st.id='stick';st.setAttribute('aria-hidden','true');
+g.appendChild(st);
+return g;
+}
+const grid=build();
+const readout=document.createElement('div');
+readout.className='readout';
+readout.innerHTML='<div class="gear" id="rg">—</div><div class="sub" id="rs">—</div>';
+const legend=document.createElement('div');
+legend.className='legend';
+legend.innerHTML='<span><kbd>←</kbd><kbd>→</kbd><kbd>↑</kbd><kbd>↓</kbd> move</span><span><kbd>⏎</kbd> confirm</span><span>hover · click · drag</span><span><kbd>Esc</kbd> close</span>';
+dlg.append(grid,readout,legend);
+const rg=document.getElementById('rg');
+const rs=document.getElementById('rs');
+const stick=document.getElementById('stick');
+function select(col,row,drag){
+if(cur.col===col&&cur.row===row)return;
+cur={col,row};
+grid.querySelectorAll('.cell').forEach(c=>{
+const s=c.dataset.col===col&&c.dataset.row===row;
+c.classList.toggle('selected',s);
+c.classList.toggle('hl-row',!s&&c.dataset.row===row);
+c.classList.toggle('hl-col',!s&&c.dataset.col===col);
+c.setAttribute('aria-selected',s);
+});
+const ci=COLUMNS.indexOf(col);
+rg.textContent=GLYPHS[ci]+'  '+col+'·'+row;
+rg.style.color=COLORS[ci];
+rs.textContent=col+' · '+row;
+rg.classList.remove('flash');
+void rg.offsetHeight;
+rg.classList.add('flash');
+updateFab();
+if(!drag)updateStick();
+}
+function updateFab(){
+const ci=COLUMNS.indexOf(cur.col);
+const ri=ROWS.indexOf(cur.row);
+const dots=ROWS.length-ri;
+fab.innerHTML='<span style="color:'+COLORS[ci]+';font-size:15px;filter:drop-shadow(0 0 3px currentColor)">'+GLYPHS[ci]+'</span><span>'+cur.col+'·'+cur.row+'</span><span style="display:flex;gap:2px;margin-left:2px">'+Array.from({length:ROWS.length},(_,i)=>'<i style="width:4px;height:4px;border-radius:50%;background:'+(i<dots?COLORS[ci]:'rgba(255,255,255,0.12)')+';box-shadow:'+(i<dots?'0 0 3px '+COLORS[ci]:'none')+'"></i>').join('')+'</span>';
+fab.style.borderColor=COLORS[ci]+'40';
+}
+function updateStick(){
+const sel=grid.querySelector('.cell.selected');
+if(!sel)return;
+const gr=grid.getBoundingClientRect();
+const cr=sel.getBoundingClientRect();
+stick.style.left=(cr.left-gr.left+cr.width/2)+'px';
+stick.style.top=(cr.top-gr.top+cr.height/2)+'px';
+}
+function open(){
+clearTimeout(ct);
+dlg.classList.add('open');
+fab.setAttribute('aria-expanded','true');
+requestAnimationFrame(()=>grid.querySelector('.cell.selected')?.focus());
+}
+function close(){
+clearTimeout(ct);
+dlg.classList.remove('open');
+fab.setAttribute('aria-expanded','false');
+}
+function sched(){
+clearTimeout(ct);
+ct=setTimeout(close,250);
+}
+fab.addEventListener('mouseenter',open);
+fab.addEventListener('mouseleave',sched);
+dlg.addEventListener('mouseenter',open);
+dlg.addEventListener('mouseleave',sched);
+document.addEventListener('keydown',e=>{
+if(e.key==='Escape'&&dlg.classList.contains('open'))close();
+});
+grid.addEventListener('click',e=>{
+const c=e.target.closest('.cell');
+if(!c)return;
+select(c.dataset.col,c.dataset.row);
+close();
+});
+let drag=false,last=null;
+grid.addEventListener('pointerdown',e=>{
+const c=e.target.closest('.cell');
+if(!c)return;
+drag=true;last=c;
+stick.classList.add('dragging');
+try{grid.setPointerCapture(e.pointerId)}catch(_){}
+select(c.dataset.col,c.dataset.row,true);
+mv(e);
+});
+grid.addEventListener('pointermove',e=>{
+if(!drag)return;
+const el=document.elementFromPoint(e.clientX,e.clientY);
+const c=el&&el.closest('.cell');
+if(c&&c!==last){last=c;select(c.dataset.col,c.dataset.row,true)}
+mv(e);
+});
+function end(){
+if(!drag)return;
+drag=false;last=null;
+stick.classList.remove('dragging');
+updateStick();
+close();
+}
+document.addEventListener('pointerup',end);
+document.addEventListener('pointercancel',end);
+function mv(e){
+const gr=grid.getBoundingClientRect();
+stick.style.left=(e.clientX-gr.left)+'px';
+stick.style.top=(e.clientY-gr.top)+'px';
+}
+document.addEventListener('keydown',e=>{
+if(!dlg.classList.contains('open'))return;
+const ac=document.activeElement?.closest('.cell');
+if(!ac)return;
+const ci=COLUMNS.indexOf(ac.dataset.col);
+const ri=ROWS.indexOf(ac.dataset.row);
+let nc=ci,nr=ri;
+switch(e.key){
+case'ArrowLeft':nc=Math.max(0,ci-1);break;
+case'ArrowRight':nc=Math.min(COLUMNS.length-1,ci+1);break;
+case'ArrowUp':nr=Math.max(0,ri-1);break;
+case'ArrowDown':nr=Math.min(ROWS.length-1,ri+1);break;
+default:return;
+}
+if(nc!==ci||nr!==ri){
+e.preventDefault();
+grid.querySelector('.cell[data-col="'+COLUMNS[nc]+'"][data-row="'+ROWS[nr]+'"]')?.focus();
+}
+});
+const sc=document.getElementById('stars');
+for(let i=0;i<80;i++){
+const s=document.createElement('div');
+s.className='star';
+const sz=Math.random()*2+0.5;
+s.style.width=sz+'px';s.style.height=sz+'px';
+s.style.left=Math.random()*100+'%';s.style.top=Math.random()*100+'%';
+s.style.animationDelay=Math.random()*4+'s';
+s.style.animationDuration=(2+Math.random()*4)+'s';
+sc.appendChild(s);
+}
+window.addEventListener('resize',()=>requestAnimationFrame(updateStick));
+select(cur.col,cur.row);
+updateStick();
+stick.style.transition='none';
+requestAnimationFrame(()=>requestAnimationFrame(()=>stick.style.transition=''));
+</script>
+</body>
+</html>
