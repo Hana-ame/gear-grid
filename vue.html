@@ -91,7 +91,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-seri
 <div class="legend">
 <span><kbd>←</kbd><kbd>→</kbd><kbd>↑</kbd><kbd>↓</kbd> move</span>
 <span><kbd>⏎</kbd> confirm</span>
-<span>hover · click · drag</span>
+<span>hover · click</span>
 <span><kbd>Esc</kbd> close</span>
 </div>
 </div>
@@ -193,7 +193,7 @@ for(let i=0;i<80;i++){
 const sz=Math.random()*2+0.5;
 stars.push({size:sz,left:Math.random()*100,top:Math.random()*100,delay:Math.random()*4,duration:2+Math.random()*4});
 }
-return{COLUMNS,ROWS,COLORS,GLYPHS,cur,open,dragging,gridRef,stickRef,select,openDialog,closeDialog,scheduleClose,onCellClick,onPointerDown,onPointerMove,endDrag,ci,ri,dots,stars};
+return{COLUMNS,ROWS,COLORS,GLYPHS,cur,open,dragging,gridRef,stickRef,select,openDialog,closeDialog,scheduleClose,onCellClick,onCellEnter,ci,ri,dots,stars};
 }
 }).mount('#app');
 </script>
