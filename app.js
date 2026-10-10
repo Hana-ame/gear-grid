@@ -28,6 +28,21 @@ const GEAR_NAMES = {
 };
 
 /* ============ State ============ */
+const GEAR_DESC = {
+  'luna-low':    'Faint moonlight brushes the darkness.',
+  'luna-medium': 'Silver radiance glows across the void.',
+  'luna-high':   'The moon blooms in brilliant silver fire.',
+  'terra-low':   'A quiet shield of stone stands guard.',
+  'terra-medium':'Rooted deep, the earth holds firm.',
+  'terra-high':  'Tectonic fury shatters the ground.',
+  'sol-low':     'Dawn light creeps over the horizon.',
+  'sol-medium':  'A golden flare dances through the sky.',
+  'sol-high':    'Solar impact — blinding, searing, absolute.',
+  'astra-low':   'Distant stars drift in silent silence.',
+  'astra-medium':'A star warden watches over the realm.',
+  'astra-high':  'Supernova — the birth of a new cosmos.',
+};
+
 let current = { element: 'sol', level: 'medium' };
 
 /* ============ DOM ============ */
@@ -35,6 +50,7 @@ const shifter     = document.getElementById('shifter');
 const stick       = document.getElementById('stick');
 const readoutGear = document.getElementById('readout-gear');
 const readoutName = document.getElementById('readout-name');
+const readoutDetail = document.getElementById('readout-detail');
 
 /* ============ Build Shifter Grid ============ */
 // Corner (empty cell for grid alignment)
@@ -110,12 +126,15 @@ function updateCells() {
 }
 
 function updateReadout() {
-  const gearName = GEAR_NAMES[`${current.element}-${current.level}`];
+  const key = `${current.element}-${current.level}`;
+  const gearName = GEAR_NAMES[key];
+  const desc = GEAR_DESC[key] || '';
   const elem  = ELEMENTS.find(e => e.key === current.element);
   const level = LEVELS.find(l  => l.key === current.level);
   readoutGear.textContent = `${elem.glyph}  ${gearName}`;
   readoutGear.style.color = elem.color;
   readoutName.textContent = `${elem.name} \u00B7 ${level.name}`;
+  readoutDetail.textContent = desc;
   // flash animation
   readoutGear.classList.remove('flash');
   void readoutGear.offsetHeight;
