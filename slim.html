@@ -29,7 +29,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-seri
 .cell::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,currentColor 0%,transparent 70%);opacity:0;transition:opacity .3s;pointer-events:none}
 .cell:hover{border-color:rgba(255,255,255,.2);transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.3)}
 .cell:hover::before{opacity:.12}
-.cell:focus-visible{outline:2px solid rgba(255,255,255,.6);outline-offset:2px}
+.cell:focus,.cell:focus-visible{outline:3px solid rgba(255,255,255,.8);outline-offset:2px;z-index:3}
 .cell .glyph{font-size:18px;line-height:1;margin-bottom:2px;filter:drop-shadow(0 0 4px currentColor);z-index:1}
 .cell .name{font-size:8px;font-weight:600;letter-spacing:1px;text-transform:uppercase;opacity:0;transition:opacity .2s;z-index:1;text-align:center;line-height:1.2}
 .cell.selected .name{opacity:.9}
