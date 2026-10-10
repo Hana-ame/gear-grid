@@ -59,181 +59,198 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-seri
 <div id="root"></div>
 <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-<script>
-const e=React.createElement;
-const{useState,useRef,useEffect}=React;
-const COLUMNS=['luna','terra','sol','astra'];
-const ROWS=['high','medium','low'];
-const COLORS=['#9fb4d4','#7fb07a','#f0a040','#b48ce0'];
-const GLYPHS=['\u263E','\u2295','\u2609','\u2726'];
-function App(){
-const[cur,setCur]=useState({col:COLUMNS[2],row:ROWS[1]});
-const[open,setOpen]=useState(false);
-const fabRef=useRef();
-const gridRef=useRef();
-const stickRef=useRef();
-const closeTimer=useRef();
-const[dragging,setDragging]=useState(false);
-const lastDrag=useRef();
-const[stickPos,setStickPos]=useRef({x:0,y:0});
-function select(col,row,isDrag){
-if(cur.col===col&&cur.row===row)return;
-setCur({col,row});
-if(!isDrag)updateStick();
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script type="text/babel">
+const COLUMNS = ['luna','terra','sol','astra'];
+const ROWS = ['high','medium','low'];
+const COLORS = ['#9fb4d4','#7fb07a','#f0a040','#b48ce0'];
+const GLYPHS = ['\u263E','\u2295','\u2609','\u2726'];
+
+function App() {
+  const [cur, setCur] = React.useState({ col: COLUMNS[2], row: ROWS[1] });
+  const [open, setOpen] = React.useState(false);
+  const [dragging, setDragging] = React.useState(false);
+  const gridRef = React.useRef(null);
+  const stickRef = React.useRef(null);
+  const closeTimer = React.useRef(null);
+  const lastDrag = React.useRef(null);
+
+  function select(col, row, isDrag) {
+    if (cur.col === col && cur.row === row) return;
+    setCur({ col, row });
+    if (!isDrag) updateStick();
+  }
+
+  function updateStick() {
+    const g = gridRef.current;
+    const s = stickRef.current;
+    if (!g || !s) return;
+    const gr = g.getBoundingClientRect();
+    const sel = g.querySelector('.cell.selected');
+    if (!sel) return;
+    const cr = sel.getBoundingClientRect();
+    s.style.transition = 'none';
+    s.style.left = (cr.left - gr.left + cr.width / 2) + 'px';
+    s.style.top = (cr.top - gr.top + cr.height / 2) + 'px';
+    requestAnimationFrame(() => { s.style.transition = ''; });
+  }
+
+  React.useEffect(() => { updateStick(); }, [cur]);
+
+  function openDialog() {
+    clearTimeout(closeTimer.current);
+    setOpen(true);
+    setTimeout(() => {
+      const s = gridRef.current && gridRef.current.querySelector('.cell.selected');
+      if (s) s.focus();
+    }, 50);
+  }
+
+  function closeDialog() {
+    clearTimeout(closeTimer.current);
+    setOpen(false);
+  }
+
+  function scheduleClose() {
+    clearTimeout(closeTimer.current);
+    closeTimer.current = setTimeout(closeDialog, 250);
+  }
+
+  React.useEffect(() => {
+    function onKey(e) {
+      if (e.key === 'Escape' && open) { closeDialog(); return; }
+      if (!open) return;
+      const ae = document.activeElement;
+      if (!ae || !ae.classList || !ae.classList.contains('cell')) return;
+      const ci = COLUMNS.indexOf(ae.dataset.col);
+      const ri = ROWS.indexOf(ae.dataset.row);
+      let nc = ci, nr = ri;
+      if (e.key === 'ArrowLeft') nc = Math.max(0, ci - 1);
+      else if (e.key === 'ArrowRight') nc = Math.min(COLUMNS.length - 1, ci + 1);
+      else if (e.key === 'ArrowUp') nr = Math.max(0, ri - 1);
+      else if (e.key === 'ArrowDown') nr = Math.min(ROWS.length - 1, ri + 1);
+      else return;
+      if (nc !== ci || nr !== ri) {
+        e.preventDefault();
+        const t = gridRef.current && gridRef.current.querySelector('.cell[data-col="' + COLUMNS[nc] + '"][data-row="' + ROWS[nr] + '"]');
+        if (t) t.focus();
+      }
+    }
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [open]);
+
+  function onCellClick(e) {
+    const c = e.target.closest('.cell');
+    if (!c) return;
+    select(c.dataset.col, c.dataset.row, false);
+    closeDialog();
+  }
+
+  function onPointerDown(e) {
+    const c = e.target.closest('.cell');
+    if (!c) return;
+    setDragging(true);
+    lastDrag.current = c;
+    stickRef.current.classList.add('dragging');
+    try { gridRef.current.setPointerCapture(e.pointerId); } catch (_) {}
+    select(c.dataset.col, c.dataset.row, true);
+    mvStick(e);
+  }
+
+  function onPointerMove(e) {
+    if (!dragging) return;
+    const el = document.elementFromPoint(e.clientX, e.clientY);
+    const c = el && el.closest('.cell');
+    if (c && c !== lastDrag.current) {
+      lastDrag.current = c;
+      select(c.dataset.col, c.dataset.row, true);
+    }
+    mvStick(e);
+  }
+
+  function endDrag() {
+    if (!dragging) return;
+    setDragging(false);
+    lastDrag.current = null;
+    stickRef.current.classList.remove('dragging');
+    updateStick();
+    closeDialog();
+  }
+
+  function mvStick(e) {
+    const gr = gridRef.current.getBoundingClientRect();
+    const s = stickRef.current;
+    s.style.left = (e.clientX - gr.left) + 'px';
+    s.style.top = (e.clientY - gr.top) + 'px';
+  }
+
+  const ci = COLUMNS.indexOf(cur.col);
+  const ri = ROWS.indexOf(cur.row);
+  const dots = ROWS.length - ri;
+
+  const stars = [];
+  for (let i = 0; i < 80; i++) {
+    const sz = Math.random() * 2 + 0.5;
+    stars.push(<div key={i} className="star" style={{ width: sz + 'px', height: sz + 'px', left: Math.random() * 100 + '%', top: Math.random() * 100 + '%', animationDelay: Math.random() * 4 + 's', animationDuration: (2 + Math.random() * 4) + 's' }} />);
+  }
+
+  return (
+    <>
+      <div className="stars">{stars}</div>
+      <div className="demo">
+        <h1>GEAR GRID · REACT</h1>
+        <p>Data-driven 2D gear selector.</p>
+        <small>COLUMNS × ROWS = auto grid</small>
+      </div>
+      <button className="fab" onClick={() => open ? closeDialog() : openDialog()} onMouseEnter={openDialog} onMouseLeave={scheduleClose} aria-haspopup="dialog" aria-expanded={open ? 'true' : 'false'}>
+        <span className="f-glyph" style={{ color: COLORS[ci] }}>{GLYPHS[ci]}</span>
+        <span>{cur.col}·{cur.row}</span>
+        <span className="f-dots">
+          {Array.from({ length: ROWS.length }, (_, i) => (
+            <i key={i} style={{ background: i < dots ? COLORS[ci] : 'rgba(255,255,255,0.12)', boxShadow: i < dots ? '0 0 3px ' + COLORS[ci] : 'none' }} />
+          ))}
+        </span>
+      </button>
+      <div className=`dialog${open ? ' open' : ''}` onMouseEnter={openDialog} onMouseLeave={scheduleClose} role="dialog" aria-modal="false">
+        <div ref={gridRef} className="grid" role="grid" aria-label="2D selector" style={{ '--cols': COLUMNS.length, '--rows': ROWS.length }} onClick={onCellClick} onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={endDrag} onPointerCancel={endDrag}>
+          <div className="corner" />
+          {COLUMNS.map((c, i) => <div key={'c' + i} className="alabel" role="columnheader">{c}</div>)}
+          {ROWS.map((r, ri2) => [
+            <div key={'r' + ri2} className="alabel ylabel" role="rowheader">{r}</div>,
+            ...COLUMNS.map((c, ci2) => {
+              const isSel = cur.col === c && cur.row === r;
+              const isRow = !isSel && cur.row === r;
+              const isCol = !isSel && cur.col === c;
+              const cls = 'cell' + (isSel ? ' selected' : '') + (isRow ? ' hl-row' : '') + (isCol ? ' hl-col' : '');
+              const cDots = ROWS.length - ri2;
+              return (
+                <button key={'cell' + ci2 + ri2} type="button" className={cls} data-col={c} data-row={r} style={{ color: COLORS[ci2], background: 'rgba(' + COLORS[ci2].slice(1).match(/.{2}/g).map(h => parseInt(h, 16)).join(',') + ',0.04)' }} role="gridcell" aria-label={c + '·' + r} aria-selected={isSel ? 'true' : 'false'}>
+                  <div className="glyph">{GLYPHS[ci2]}</div>
+                  <div className="name">{c}·{r}</div>
+                  <div className="dots">{Array.from({ length: ROWS.length }, (_, d) => <i key={d} className={d < cDots ? 'on' : ''} />)}</div>
+                </button>
+              );
+            })
+          ])}
+          <div ref={stickRef} className=`stick${dragging ? ' dragging' : ''}` aria-hidden="true" />
+        </div>
+        <div className="readout">
+          <div className="gear" style={{ color: COLORS[ci] }}>{GLYPHS[ci]}  {cur.col}·{cur.row}</div>
+          <div className="sub">{cur.col} · {cur.row}</div>
+        </div>
+        <div className="legend">
+          <span><kbd>←</kbd><kbd>→</kbd><kbd>↑</kbd><kbd>↓</kbd> move</span>
+          <span><kbd>⏎</kbd> confirm</span>
+          <span>hover · click · drag</span>
+          <span><kbd>Esc</kbd> close</span>
+        </div>
+      </div>
+    </>
+  );
 }
-function updateStick(){
-const g=gridRef.current;
-const s=stickRef.current;
-if(!g||!s)return;
-const gr=g.getBoundingClientRect();
-const sel=g.querySelector('.cell.selected');
-if(!sel)return;
-const cr=sel.getBoundingClientRect();
-s.style.transition='none';
-s.style.left=(cr.left-gr.left+cr.width/2)+'px';
-s.style.top=(cr.top-gr.top+cr.height/2)+'px';
-requestAnimationFrame(()=>{s.style.transition='';});
-}
-useEffect(()=>{updateStick();},[cur]);
-function openDialog(){
-clearTimeout(closeTimer.current);
-setOpen(true);
-setTimeout(()=>{
-const s=gridRef.current&&gridRef.current.querySelector('.cell.selected');
-if(s)s.focus();
-},50);
-}
-function closeDialog(){
-clearTimeout(closeTimer.current);
-setOpen(false);
-}
-function scheduleClose(){
-clearTimeout(closeTimer.current);
-closeTimer.current=setTimeout(closeDialog,250);
-}
-useEffect(()=>{
-function onKey(e){
-if(e.key==='Escape'&&open){closeDialog();return;}
-if(!open)return;
-const ae=document.activeElement;
-if(!ae||!ae.classList||!ae.classList.contains('cell'))return;
-const ci=COLUMNS.indexOf(ae.dataset.col);
-const ri=ROWS.indexOf(ae.dataset.row);
-let nc=ci,nr=ri;
-if(e.key==='ArrowLeft')nc=Math.max(0,ci-1);
-else if(e.key==='ArrowRight')nc=Math.min(COLUMNS.length-1,ci+1);
-else if(e.key==='ArrowUp')nr=Math.max(0,ri-1);
-else if(e.key==='ArrowDown')nr=Math.min(ROWS.length-1,ri+1);
-else return;
-if(nc!==ci||nr!==ri){
-e.preventDefault();
-const t=gridRef.current&&gridRef.current.querySelector('.cell[data-col="'+COLUMNS[nc]+'"][data-row="'+ROWS[nr]+'"]');
-if(t)t.focus();
-}
-}
-document.addEventListener('keydown',onKey);
-return()=>document.removeEventListener('keydown',onKey);
-},[open]);
-useEffect(()=>{
-updateStick();
-},[]);
-function onCellClick(e){
-const c=e.target.closest('.cell');
-if(!c)return;
-select(c.dataset.col,c.dataset.row,false);
-closeDialog();
-}
-function onPointerDown(e){
-const c=e.target.closest('.cell');
-if(!c)return;
-setDragging(true);
-lastDrag.current=c;
-stickRef.current.classList.add('dragging');
-try{gridRef.current.setPointerCapture(e.pointerId);}catch(_){}
-select(c.dataset.col,c.dataset.row,true);
-mvStick(e);
-}
-function onPointerMove(e){
-if(!dragging)return;
-const el=document.elementFromPoint(e.clientX,e.clientY);
-const c=el&&el.closest('.cell');
-if(c&&c!==lastDrag.current){
-lastDrag.current=c;
-select(c.dataset.col,c.dataset.row,true);
-}
-mvStick(e);
-}
-function endDrag(){
-if(!dragging)return;
-setDragging(false);
-lastDrag.current=null;
-stickRef.current.classList.remove('dragging');
-updateStick();
-closeDialog();
-}
-function mvStick(e){
-const gr=gridRef.current.getBoundingClientRect();
-const s=stickRef.current;
-s.style.left=(e.clientX-gr.left)+'px';
-s.style.top=(e.clientY-gr.top)+'px';
-}
-const ci=COLUMNS.indexOf(cur.col);
-const ri=ROWS.indexOf(cur.row);
-const dots=ROWS.length-ri;
-const stars=[];
-for(let i=0;i<80;i++){
-const sz=Math.random()*2+0.5;
-stars.push(e('div',{key:i,className:'star',style:{width:sz+'px',height:sz+'px',left:Math.random()*100+'%',top:Math.random()*100+'%',animationDelay:Math.random()*4+'s',animationDuration:(2+Math.random()*4)+'s'}}));
-}
-return e(React.Fragment,null,
-e('div',{className:'stars'},stars),
-e('div',{className:'demo'},
-e('h1',null,'GEAR GRID \u00B7 REACT'),
-e('p',null,'Data-driven 2D gear selector.'),
-e('small',null,'COLUMNS \u00D7 ROWS = auto grid')
-),
-e('button',{ref:fabRef,className:'fab',onClick:()=>{open?closeDialog():openDialog();},onMouseEnter:openDialog,onMouseLeave:scheduleClose,'aria-haspopup':'dialog','aria-expanded':open?'true':'false'},
-e('span',{className:'f-glyph',style:{color:COLORS[ci]}},GLYPHS[ci]),
-e('span',null,cur.col+'\u00B7'+cur.row),
-e('span',{className:'f-dots'},Array.from({length:ROWS.length},(_,i)=>e('i',{key:i,style:{background:i<dots?COLORS[ci]:'rgba(255,255,255,0.12)',boxShadow:i<dots?'0 0 3px '+COLORS[ci]:'none'}})))
-),
-e('div',{className:'dialog'+(open?' open':''),onMouseEnter:openDialog,onMouseLeave:scheduleClose,role:'dialog','aria-modal':'false'},
-e('div',{ref:gridRef,className:'grid','role':'grid','aria-label':'2D selector',style:{'--cols':COLUMNS.length,'--rows':ROWS.length},onClick:onCellClick,onPointerDown:onPointerDown,onPointerMove:onPointerMove,onPointerUp:endDrag,onPointerCancel:endDrag},
-e('div',{className:'corner'}),
-COLUMNS.map((c,i)=>e('div',{key:'c'+i,className:'alabel','role':'columnheader'},c)),
-ROWS.map((r,ri2)=>[
-e('div',{key:'r'+ri2,className:'alabel ylabel','role':'rowheader'},r),
-COLUMNS.map((c,ci2)=>{
-const isSel=cur.col===c&&cur.row===r;
-const isRow=!isSel&&cur.row===r;
-const isCol=!isSel&&cur.col===c;
-let cls='cell';
-if(isSel)cls+=' selected';
-if(isRow)cls+=' hl-row';
-if(isCol)cls+=' hl-col';
-const cDots=ROWS.length-ri2;
-return e('button',{key:'cell'+ci2+ri2,type:'button',className:cls,'data-col':c,'data-row':r,style:{color:COLORS[ci2],background:'rgba('+COLORS[ci2].slice(1).match(/.{2}/g).map(h=>parseInt(h,16)).join(',')+',0.04)'},'role':'gridcell','aria-label':c+'\u00B7'+r,'aria-selected':isSel?'true':'false'},
-e('div',{className:'glyph'},GLYPHS[ci2]),
-e('div',{className:'name'},c+'\u00B7'+r),
-e('div',{className:'dots'},Array.from({length:ROWS.length},(_,d)=>e('i',{key:d,className:d<cDots?'on':''})))
-);
-})
-]),
-e('div',{ref:stickRef,className:'stick'+(dragging?' dragging':''),'aria-hidden':'true'})
-),
-e('div',{className:'readout'},
-e('div',{className:'gear','style':{color:COLORS[ci]}},GLYPHS[ci]+'  '+cur.col+'\u00B7'+cur.row),
-e('div',{className:'sub'},cur.col+' \u00B7 '+cur.row)
-),
-e('div',{className:'legend'},
-e('span',null,e('kbd',null,'\u2190'),e('kbd',null,'\u2192'),e('kbd',null,'\u2191'),e('kbd',null,'\u2193'),' move'),
-e('span',null,e('kbd',null,'\u23CE'),' confirm'),
-e('span',null,'hover \u00B7 click \u00B7 drag'),
-e('span',null,e('kbd',null,'Esc'),' close')
-)
-);
-}
-ReactDOM.createRoot(document.getElementById('root')).render(e(App));
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
 </script>
 </body>
 </html>
