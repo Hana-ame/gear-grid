@@ -7,9 +7,9 @@ const ELEMENTS = [
 ];
 
 const LEVELS = [
-  { key: 'low',    name: 'Low',    dots: 1 },
-  { key: 'medium', name: 'Medium', dots: 2 },
   { key: 'high',   name: 'High',   dots: 3 },
+  { key: 'medium', name: 'Medium', dots: 2 },
+  { key: 'low',    name: 'Low',    dots: 1 },
 ];
 
 const GEAR_NAMES = {
@@ -240,12 +240,15 @@ function moveStickToPointer(e) {
   stick.style.top  = (e.clientY - sRect.top)  + 'px';
 }
 
-/* ============ Keyboard (grid navigation, only when dialog open) ============ */
+/* ============ Keyboard (grid navigation — focus move only) ============ */
 document.addEventListener('keydown', e => {
   if (!dialog.classList.contains('open')) return;
 
-  const col = ELEMENTS.findIndex(el => el.key === current.element);
-  const row = LEVELS.findIndex(l  => l.key  === current.level);
+  const activeCell = document.activeElement?.closest('.cell');
+  if (!activeCell) return;
+
+  const col = ELEMENTS.findIndex(el => el.key === activeCell.dataset.element);
+  const row = LEVELS.findIndex(l  => l.key  === activeCell.dataset.level);
 
   let newCol = col, newRow = row;
 
@@ -259,7 +262,10 @@ document.addEventListener('keydown', e => {
 
   if (newCol !== col || newRow !== row) {
     e.preventDefault();
-    select(ELEMENTS[newCol].key, LEVELS[newRow].key);
+    const targetCell = shifter.querySelector(
+      `.cell[data-element="${ELEMENTS[newCol].key}"][data-level="${LEVELS[newRow].key}"]`
+    );
+    if (targetCell) targetCell.focus();
   }
 });
 
