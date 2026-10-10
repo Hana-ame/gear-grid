@@ -1,6 +1,6 @@
 # Gear Grid · 2D Cosmic Shifter
 
-A two-dimensional gear selector — a "shifter" with **low / medium / high** on the X-axis and **luna / terra / sol / astra** on the Y-axis. 12 distinct gear positions, selectable by click, drag, or keyboard.
+A two-dimensional gear selector — a "shifter" with **luna / terra / sol / astra** on the X-axis and **low / medium / high** on the Y-axis. 12 distinct gear positions (4 × 3 grid), selectable by click, drag, or keyboard.
 
 ## Live Demo
 
@@ -8,12 +8,11 @@ A two-dimensional gear selector — a "shifter" with **low / medium / high** on 
 
 ## Gear Table
 
-|            | LOW           | MEDIUM         | HIGH           |
-|------------|---------------|----------------|----------------|
-| **Luna**   | Lunar Dim     | Lunar Glow     | Lunar Bloom    |
-| **Terra**  | Earth Shield  | Earth Anchor   | Earth Fury     |
-| **Sol**    | Solar Dawn    | Solar Flare    | Solar Impact   |
-| **Astra**  | Star Drift    | Star Warden    | Star Nova      |
+|            | LUNA          | TERRA         | SOL          | ASTRA         |
+|------------|---------------|---------------|--------------|---------------|
+| **LOW**    | Lunar Dim     | Earth Shield  | Solar Dawn   | Star Drift    |
+| **MEDIUM** | Lunar Glow    | Earth Anchor  | Solar Flare  | Star Warden   |
+| **HIGH**   | Lunar Bloom   | Earth Fury    | Solar Impact | Star Nova     |
 
 ## Controls
 

@@ -43,23 +43,23 @@ corner.className = 'corner';
 shifter.appendChild(corner);
 
 // X-axis labels (column headers)
-LEVELS.forEach(level => {
+ELEMENTS.forEach(elem => {
   const label = document.createElement('div');
   label.className = 'axis-label';
   label.setAttribute('role', 'columnheader');
-  label.textContent = level.name.toUpperCase();
+  label.textContent = elem.name.toUpperCase();
   shifter.appendChild(label);
 });
 
 // Y-axis labels + cells (row by row)
-ELEMENTS.forEach(elem => {
+LEVELS.forEach(level => {
   const yLabel = document.createElement('div');
   yLabel.className = 'axis-label y-label';
   yLabel.setAttribute('role', 'rowheader');
-  yLabel.textContent = elem.name.toUpperCase();
+  yLabel.textContent = level.name.toUpperCase();
   shifter.appendChild(yLabel);
 
-  LEVELS.forEach(level => {
+  ELEMENTS.forEach(elem => {
     const cell = document.createElement('button');
     cell.type = 'button';
     cell.className = 'cell';
@@ -183,22 +183,22 @@ function moveStickToPointer(e) {
 
 /* ============ Keyboard ============ */
 document.addEventListener('keydown', e => {
-  const col = LEVELS.findIndex(l  => l.key  === current.level);
-  const row = ELEMENTS.findIndex(el => el.key === current.element);
+  const col = ELEMENTS.findIndex(el => el.key === current.element);
+  const row = LEVELS.findIndex(l  => l.key  === current.level);
 
   let newCol = col, newRow = row;
 
   switch (e.key) {
     case 'ArrowLeft':  newCol = Math.max(0, col - 1);           break;
-    case 'ArrowRight': newCol = Math.min(LEVELS.length - 1, col + 1);  break;
+    case 'ArrowRight': newCol = Math.min(ELEMENTS.length - 1, col + 1);  break;
     case 'ArrowUp':    newRow = Math.max(0, row - 1);           break;
-    case 'ArrowDown':  newRow = Math.min(ELEMENTS.length - 1, row + 1); break;
+    case 'ArrowDown':  newRow = Math.min(LEVELS.length - 1, row + 1); break;
     default: return;
   }
 
   if (newCol !== col || newRow !== row) {
     e.preventDefault();
-    select(ELEMENTS[newRow].key, LEVELS[newCol].key);
+    select(ELEMENTS[newCol].key, LEVELS[newRow].key);
   }
 });
 

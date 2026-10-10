@@ -108,11 +108,11 @@ h1 {
 /* ============ Shifter Grid ============ */
 .shifter {
   display: grid;
-  grid-template-columns: 52px repeat(3, 1fr);
-  grid-template-rows: auto repeat(4, 1fr);
+  grid-template-columns: 52px repeat(4, 1fr);
+  grid-template-rows: auto repeat(3, 1fr);
   gap: 8px;
   position: relative;
-  height: 440px;
+  height: 380px;
 }
 
 .corner { /* empty */ }
@@ -338,7 +338,7 @@ kbd {
 @media (max-width: 520px) {
   .panel { padding: 24px 16px; }
   h1 { font-size: 24px; letter-spacing: 8px; padding-left: 8px; }
-  .shifter { height: 360px; grid-template-columns: 40px repeat(3, 1fr); }
+  .shifter { height: 320px; grid-template-columns: 40px repeat(4, 1fr); }
   .cell .name { font-size: 9px; }
   .cell .glyph { font-size: 18px; }
   .readout-gear { font-size: 22px; }
