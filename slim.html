@@ -169,7 +169,9 @@ function open(){
 clearTimeout(ct);
 dlg.classList.add('open');
 fab.setAttribute('aria-expanded','true');
-requestAnimationFrame(()=>grid.querySelector('.cell.selected')?.focus());
+var s=grid.querySelector('.cell.selected');
+if(s)s.focus();
+setTimeout(function(){var s2=grid.querySelector('.cell.selected');if(s2&&document.activeElement!==s2)s2.focus();},50);
 }
 function close(){
 clearTimeout(ct);
